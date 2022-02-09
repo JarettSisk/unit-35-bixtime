@@ -31,8 +31,8 @@ router.get("/:id", async (req, res, next) => {
 router.post("/", async (req, res, next) => {
     try {
         const { comp_code, amt, paid, paid_date } = req.body;
-        const result = await db.query("INSERT INTO invoices (comp_code, amt, paid, paid_date) VALUES ($1, $2, $3, $4) RETURNING *", [comp_code, amt, paid, paid_date]);
-        return res.status(201).json( {invoices : result.rows[0]} );
+        const result = await db.query("INSERT INTO invoices (comp_code, amt, paid, paid_date) VALUES ($1, $2, $3, $4)", [comp_code, amt, paid, paid_date]);
+        return res.status(201).json( {msg : "sucessfully created new invoice"} );
     } catch (error) {
         return next(error);
     }
@@ -42,8 +42,15 @@ router.post("/", async (req, res, next) => {
 router.put("/:id", async(req, res, next) => {
     try {
         const { id } = req.params;
-        const { amt } = req.body;
-        const result = await db.query("UPDATE invoices SET amt=$1 WHERE id=$2 RETURNING *", [amt, id]);
+        let { amt, paid } = req.body;
+
+        if (paid === true) {
+            paid = new Date().toISOString()
+        } else {
+            paid = null;
+        }
+
+        const result = await db.query("UPDATE invoices SET amt=$1, paid_date=$2 WHERE id=$3 RETURNING *", [amt, paid, id]);
         if (result.rows.length === 0) {
             throw new ExpressError("No invoice found, please check id", 404);
         }

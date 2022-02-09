@@ -14,7 +14,7 @@ else {
 }
 
 // giving the uri to the client to connect to
-const db = new Client({ 
+let db = new Client({ 
     connectionString: DB_URI
 });
 
